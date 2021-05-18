@@ -23,7 +23,7 @@ func CreateModel(inputs int, trainingData [][][]float64, model string) {
 	nn.Save(model)
 }
 
-func PredictForModel(inputs []float64, model string) []float64{
+func PredictForModel(inputs []float64, model string) []float64 {
 	// Load the model
 	nn2, err := gonet.Load(model)
 	if err != nil {

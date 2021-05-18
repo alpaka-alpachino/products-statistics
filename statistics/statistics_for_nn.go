@@ -3,206 +3,144 @@ package statistics
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
 	"time"
 
 	"github.com/web-site/storage"
 )
 
-type SideNNStatsModel struct {
-	Raws []Raws
+const (
+	selectQuery         = "SELECT date, price FROM prices WHERE product = $1 ORDER BY date ASC"
+	min, max    float64 = 0, 1000
+)
+
+type NNStatsModel struct {
+	Rows []Rows
 }
 
-type Raws struct {
+type Rows struct {
 	Dates  time.Time
 	Prices float64
 }
 
-// GetTrainingData
-func GetTrainingData(targets, stats []SideNNStatsModel, rawsLen int) [][][]float64{
+// GetTrainingData returns training data from given targets and stats
+func GetTrainingData(targets, stats []NNStatsModel, rawsLen int) [][][]float64 {
 	var targetPrices []float64
-	//var targetDates []time.Time
+
 	for i := 0; i < rawsLen; i++ {
 		for _, v := range targets {
-			targetPrices = append(targetPrices, v.Raws[i].Prices)
-			//targetDates = append(targetDates, v.Raws[i].Dates)
+			targetPrices = append(targetPrices, v.Rows[i].Prices)
 		}
 	}
-	//statistics.DateNormalizer(targetDates)
 
 	targetPrices = Normalizer(targetPrices)
 
 	for _, stat := range stats {
-		prices := make([]float64, 0, len(stat.Raws))
-		for _, raw := range stat.Raws {
+		prices := make([]float64, 0, len(stat.Rows))
+
+		for _, raw := range stat.Rows {
 			prices = append(prices, raw.Prices)
 		}
 
 		normalizedPrices := Normalizer(prices)
 
 		for i, v := range normalizedPrices {
-			stat.Raws[i].Prices = v
+			stat.Rows[i].Prices = v
 		}
 	}
 
 	var normalizedSideProds [][]float64
+
 	for i := 0; i < rawsLen; i++ {
 		var normalizedSidePrices []float64
 
 		for _, v := range stats {
-			normalizedSidePrices = append(normalizedSidePrices, v.Raws[i].Prices)
+			normalizedSidePrices = append(normalizedSidePrices, v.Rows[i].Prices)
 		}
+
 		normalizedSideProds = append(normalizedSideProds, normalizedSidePrices)
 
 	}
 
 	var trainingData [][][]float64
+
 	targetPrices = targetPrices[1:]
-	normalizedSideProds = normalizedSideProds[:len(normalizedSideProds) -1]
+	normalizedSideProds = normalizedSideProds[:len(normalizedSideProds)-1]
 
 	for i, v := range normalizedSideProds {
-		var test [][]float64
-		test = append(test, v)
-		test = append(test, []float64{targetPrices[i]})
-		trainingData = append(trainingData, test)
+		var sideProdsColumns [][]float64
+
+		sideProdsColumns = append(sideProdsColumns, v)
+		sideProdsColumns = append(sideProdsColumns, []float64{targetPrices[i]})
+
+		trainingData = append(trainingData, sideProdsColumns)
 	}
 
 	return trainingData
 }
 
-//at least 2 products
-func GetSideStatForNN(prods []string) ([]SideNNStatsModel, int) {
-	var rawsLen int
+// GetStatsForNN retrieves data and len by keys,
+// should accept at least 2 product types (keys) as input
+func GetStatsForNN(prods []string) ([]NNStatsModel, int, error) {
+	var rowsLen int
 	s := fmt.Sprintf(sourceFormat, os.Getenv("PG_USER"), os.Getenv("PG_PASS"), os.Getenv("PG_DB"))
 	database, err := sql.Open("postgres", s)
 	if err != nil {
-		panic(err)
+		return nil, 0, err
 	}
 	defer func(database *sql.DB) {
 		err := database.Close()
 		if err != nil {
-			panic(err)
+			log.Println(err)
 		}
 	}(database)
-
-	var prodSymbols string = " $1"
-	for i := 2; i <= len(prods); i++ {
-		prodSymbols = fmt.Sprintf("%s OR product = $%d", prodSymbols, i)
-	}
 
 	var prodValues []interface{}
 	for v := range prods {
 		prodValues = append(prodValues, prods[v])
 	}
 
-	set := make([]SideNNStatsModel, 0, 0)
+	set := make([]NNStatsModel, 0, 0)
 	for p := range prodValues {
-		res, err := database.Query("SELECT date, price FROM prices WHERE product = $1 ORDER BY date ASC", prodValues[p])
+		res, err := database.Query(selectQuery, prodValues[p])
 		if err != nil {
-			panic(err)
+			return nil, 0, err
 		}
 
-		var raws []Raws
+		var raws []Rows
 		for res.Next() {
 			var model = new(storage.Model)
 			err = res.Scan(&model.Date, &model.Price)
 			if err != nil {
-				panic(err)
+				return nil, 0, err
 			}
-			res.Err()
+
 			storage.Statistics = append(storage.Statistics, *model)
-			raws = append(raws, Raws{
+			raws = append(raws, Rows{
 				Dates:  model.Date,
 				Prices: model.Price,
 			})
 
-			rawsLen = len(raws) - 1 //todo fix in scraper
+			rowsLen = len(raws) - 1 // may be changed in scraper
 		}
-		//set[prods[p]] = SideNNStatsModel{Raws: raws[:len(raws)-1]}
-		set = append(set, SideNNStatsModel{Raws: raws[:len(raws)-1]})
-
+		set = append(set, NNStatsModel{Rows: raws[:len(raws)-1]})
 	}
 
-	return set, rawsLen
+	return set, rowsLen, nil
 }
 
-func RawNormilizer(raws []Raws) ([]float64, []float64) {
-	var dates []time.Time
-	var prices []float64
-
-	for _, p := range raws {
-		dates = append(dates, p.Dates)
-		prices = append(prices, p.Prices)
-	}
-
-	return DateNormalizer(dates), Normalizer(prices)
-}
-
-func GetNormalizedPrices(raws []Raws) []float64 {
-	var prices []float64
-
-	for _, p := range raws {
-		prices = append(prices, p.Prices)
-	}
-
-	return Normalizer(prices)
-}
-
-func DateNormalizer(dates []time.Time) []float64 {
-	var normalizedDates []float64
-	for i := 0; i <= len(dates); i++ {
-		normalizedDates = append(normalizedDates, float64(i))
-	}
-
-	normalizedDates = Normalizer(normalizedDates)
-	return normalizedDates
-}
-
-func NamesNormalizer(dates []string) []float64 {
-	var normalizedDates []float64
-	for i := 0; i <= len(dates); i++ {
-		normalizedDates = append(normalizedDates, float64(i))
-	}
-
-	normalizedDates = Normalizer(normalizedDates)
-	return normalizedDates
-}
-
+// Normalizer normalizes data
 func Normalizer(in []float64) []float64 {
 	out := make([]float64, 0, len(in))
-	//min, max := MinMax(in)
-	var min, max float64 = 0,1000
 	switch min {
 	case max:
 		out = make([]float64, len(in), len(in))
 	default:
 		for v := range in {
-			out = append(out, ((in[v] - min) / (max - min)))
+			out = append(out, (in[v]-min)/(max-min))
 		}
 	}
 
 	return out
-}
-
-func MinMax(in []float64) (float64, float64) {
-	var max = in[0]
-	var min = in[0]
-	for _, value := range in {
-		if max < value {
-			max = value
-		}
-		if min > value {
-			min = value
-		}
-	}
-	return min, max
-}
-
-func Average(in []float64) float64 {
-	total := 0.0
-	for _, v := range in {
-		total += v
-	}
-	res := total / float64(len(in))
-	return res
 }

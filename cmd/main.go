@@ -9,21 +9,28 @@ import (
 )
 
 func main() {
-	fmt.Println(statistics.GetHotRises())
+	fmt.Println(statistics.GetChanges(storage.All, statistics.HotCheapening))
 
-	targets, targetRowsLen := statistics.GetSideStatForNN(storage.KeyPoint)
-	stats, sideRowsLen := statistics.GetSideStatForNN(storage.InterestPointsNN)
-	if targetRowsLen != sideRowsLen {
-		log.Println("input rows quantity must be equal for target and side products")
+	targets, targetRowsLen, err := statistics.GetStatsForNN(storage.KeyPoint)
+	if err != nil {
+		log.Fatal(err)
+	}
+	stats, sideRowsLen, err := statistics.GetStatsForNN(storage.InterestPointsNN)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	trainingData := statistics.GetTrainingData(targets,stats, targetRowsLen)
+	if targetRowsLen != sideRowsLen {
+		log.Fatal("input rows quantity must be equal for target and side products")
+	}
+
+	trainingData := statistics.GetTrainingData(targets, stats, targetRowsLen)
 
 	tools.CreateModel(8, trainingData, "model.json")
 
-	 prediction :=tools.PredictForModel(
-		 []float64{0.10170, 0.052899999999999996, 0.0895, 0.0756, 0.039130000000000005, 0.03716, 0.03163, 0.03174},
-		 "model.json")
+	prediction := tools.PredictForModel(
+		[]float64{0.10170, 0.052899999999999996, 0.0895, 0.0756, 0.039130000000000005, 0.03716, 0.03163, 0.03174},
+		"model.json")
 
 	fmt.Println(prediction)
 
