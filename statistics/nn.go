@@ -110,7 +110,7 @@ func GetStatsForNN(prods []string) ([]NNStatsModel, int, error) {
 
 		var raws []Rows
 		for res.Next() {
-			var model = new(storage.Model)
+			var model = new(storage.ProductModel)
 			err = res.Scan(&model.Date, &model.Price)
 			if err != nil {
 				return nil, 0, err

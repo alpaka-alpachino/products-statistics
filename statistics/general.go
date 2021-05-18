@@ -18,6 +18,7 @@ const (
 	Rises         = "Rise"
 	HotCheapening = "Hot Cheapening"
 	Cheapening    = "Cheapening"
+	Stable        = "Stable"
 )
 
 var errEmptyDate = errors.New("empty date slice")
@@ -74,8 +75,8 @@ func GetStatForProduct(prod string) (productStats, error) {
 	var dates []time.Time
 
 	for res.Next() {
-		var model = new(storage.Model)
-		err = res.Scan(&model.Price, &model.Date)
+		var model = new(storage.ProductModel)
+		err = res.Scan(&model.Date, &model.Price)
 		if err != nil {
 			return productStats{}, err
 		}
@@ -124,14 +125,15 @@ func SimpleTrendCheck(initial, average, final float64) (string, float64) {
 			return Cheapening, wholeChange
 		}
 	} else {
-		return "Stable", 0
+		return Stable, 0
 	}
 }
 
-func MinMax(in []float64) (float64, float64) {
-	var max = in[0]
-	var min = in[0]
-	for _, value := range in {
+// MinMax gets minimal and maximum values from array
+func MinMax(inputs []float64) (float64, float64) {
+	var max = inputs[0]
+	var min = inputs[0]
+	for _, value := range inputs {
 		if max < value {
 			max = value
 		}
@@ -139,14 +141,16 @@ func MinMax(in []float64) (float64, float64) {
 			min = value
 		}
 	}
+
 	return min, max
 }
 
-func Average(in []float64) float64 {
+// Average gets average value from array
+func Average(inputs []float64) float64 {
 	total := 0.0
-	for _, v := range in {
+	for _, v := range inputs {
 		total += v
 	}
-	res := total / float64(len(in))
+	res := total / float64(len(inputs))
 	return res
 }
