@@ -11,6 +11,22 @@ import (
 
 const sourceFormat = "host=localhost port=5432 user=%v password=%v dbname=%v sslmode=disable"
 
+func GetHotRises()[]string{
+	var hotRises []string
+	var others []string
+	var interest = storage.All
+	for v := range interest {
+		_, _, firstPrice, _, lastPrice, _, _, avg:= GetStatForProduct(interest[v])
+		status,change := SimpleTrendCheck(firstPrice,avg,lastPrice)
+		if status == "Hot Rise"{
+			hotRises = append(hotRises, fmt.Sprintf(`%s:  %v`,interest[v],change))
+		}else {
+			others =  append(others, fmt.Sprintf(`%s:  %v`,interest[v],change))
+		}
+	}
+	return hotRises
+}
+
 func GetStatForProduct(prod string) (string, time.Time, float64, time.Time, float64, float64, float64, float64) {
 	//connect to db
 	s := fmt.Sprintf(sourceFormat, os.Getenv("PG_USER"), os.Getenv("PG_PASS"), os.Getenv("PG_DB"))

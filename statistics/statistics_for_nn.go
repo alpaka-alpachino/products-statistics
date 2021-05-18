@@ -3,9 +3,10 @@ package statistics
 import (
 	"database/sql"
 	"fmt"
-	"github.com/web-site/storage"
 	"os"
 	"time"
+
+	"github.com/web-site/storage"
 )
 
 type SideNNStatsModel struct {
@@ -15,6 +16,58 @@ type SideNNStatsModel struct {
 type Raws struct {
 	Dates  time.Time
 	Prices float64
+}
+
+// GetTrainingData
+func GetTrainingData(targets, stats []SideNNStatsModel, rawsLen int) [][][]float64{
+	var targetPrices []float64
+	//var targetDates []time.Time
+	for i := 0; i < rawsLen; i++ {
+		for _, v := range targets {
+			targetPrices = append(targetPrices, v.Raws[i].Prices)
+			//targetDates = append(targetDates, v.Raws[i].Dates)
+		}
+	}
+	//statistics.DateNormalizer(targetDates)
+
+	targetPrices = Normalizer(targetPrices)
+
+	for _, stat := range stats {
+		prices := make([]float64, 0, len(stat.Raws))
+		for _, raw := range stat.Raws {
+			prices = append(prices, raw.Prices)
+		}
+
+		normalizedPrices := Normalizer(prices)
+
+		for i, v := range normalizedPrices {
+			stat.Raws[i].Prices = v
+		}
+	}
+
+	var normalizedSideProds [][]float64
+	for i := 0; i < rawsLen; i++ {
+		var normalizedSidePrices []float64
+
+		for _, v := range stats {
+			normalizedSidePrices = append(normalizedSidePrices, v.Raws[i].Prices)
+		}
+		normalizedSideProds = append(normalizedSideProds, normalizedSidePrices)
+
+	}
+
+	var trainingData [][][]float64
+	targetPrices = targetPrices[1:]
+	normalizedSideProds = normalizedSideProds[:len(normalizedSideProds) -1]
+
+	for i, v := range normalizedSideProds {
+		var test [][]float64
+		test = append(test, v)
+		test = append(test, []float64{targetPrices[i]})
+		trainingData = append(trainingData, test)
+	}
+
+	return trainingData
 }
 
 //at least 2 products
@@ -42,7 +95,7 @@ func GetSideStatForNN(prods []string) ([]SideNNStatsModel, int) {
 		prodValues = append(prodValues, prods[v])
 	}
 
-	set := make([]SideNNStatsModel,0,0)
+	set := make([]SideNNStatsModel, 0, 0)
 	for p := range prodValues {
 		res, err := database.Query("SELECT date, price FROM prices WHERE product = $1 ORDER BY date ASC", prodValues[p])
 		if err != nil {
@@ -63,7 +116,7 @@ func GetSideStatForNN(prods []string) ([]SideNNStatsModel, int) {
 				Prices: model.Price,
 			})
 
-			rawsLen = len(raws) -1 //todo fix in scraper
+			rawsLen = len(raws) - 1 //todo fix in scraper
 		}
 		//set[prods[p]] = SideNNStatsModel{Raws: raws[:len(raws)-1]}
 		set = append(set, SideNNStatsModel{Raws: raws[:len(raws)-1]})
@@ -116,11 +169,18 @@ func NamesNormalizer(dates []string) []float64 {
 }
 
 func Normalizer(in []float64) []float64 {
-	var out []float64
-	min, max := MinMax(in)
-	for v := range in {
-		out = append(out, ((in[v] - min) / (max - min)))
+	out := make([]float64, 0, len(in))
+	//min, max := MinMax(in)
+	var min, max float64 = 0,1000
+	switch min {
+	case max:
+		out = make([]float64, len(in), len(in))
+	default:
+		for v := range in {
+			out = append(out, ((in[v] - min) / (max - min)))
+		}
 	}
+
 	return out
 }
 
