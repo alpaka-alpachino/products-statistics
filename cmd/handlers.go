@@ -14,7 +14,7 @@ type IndexStats struct {
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("front/index.html", "front/header.html", "front/footer.html")
+	t, err := template.ParseFiles("front/index.html", "front/header.html")
 	if err != nil {
 		fmt.Fprintf(w, err.Error())
 	}
@@ -34,7 +34,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 
 func handleFunc() {
 	http.HandleFunc("/", index)
-	err := http.ListenAndServe(":8000", nil)
+	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		return
 	}

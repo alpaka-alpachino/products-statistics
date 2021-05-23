@@ -45,9 +45,9 @@ func GetChanges(inputs []string, requestedStatus string) ([]string, error) {
 		}
 		status, change := SimpleTrendCheck(productStats.firstPrice, productStats.averagePrice, productStats.lastPrice)
 		if status == requestedStatus {
-			hotRises = append(hotRises, fmt.Sprintf("\n%s -->  %.2f;", inputs[v], change))
+			hotRises = append(hotRises, fmt.Sprintf("%s -->  %.2f;", inputs[v], change))
 		} else {
-			others = append(others, fmt.Sprintf("\n%s -->  %.2f;", inputs[v], change))
+			others = append(others, fmt.Sprintf("%s -->  %.2f;", inputs[v], change))
 		}
 	}
 	return hotRises, nil
