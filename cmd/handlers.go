@@ -1,7 +1,9 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"github.com/gorilla/mux"
 	"html/template"
 	"net/http"
 )
@@ -32,10 +34,26 @@ func index(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handleFunc() {
-	http.HandleFunc("/", index)
-	err := http.ListenAndServe(":8080", nil)
-	if err != nil {
-		return
+type Server struct {
+	server *http.Server
+}
+
+func NewServer() *Server {
+	addr := *flag.String("address", ":8080", "address of server")
+	flag.Parse()
+
+	rtr := mux.NewRouter()
+	//rtr.Use(Middleware)
+	rtr.HandleFunc("/", index).Methods("GET")
+
+	return &Server{
+		&http.Server{
+			Addr:    addr,
+			Handler: ddosFilter(rtr),
+		},
 	}
+}
+
+func (ws *Server) Run() error {
+	return ws.server.ListenAndServe()
 }
