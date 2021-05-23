@@ -8,8 +8,22 @@ import (
 	"log"
 )
 
+var (
+	hotRises           []string
+	regionsForSelected map[string]string
+	selected string
+	predictionForSelected string
+	err                error
+)
+
 func main() {
-	fmt.Println(statistics.GetChanges(storage.All, statistics.HotCheapening))
+	hotRises, err = statistics.GetChanges(storage.All, statistics.HotRises)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	selected = storage.KeyPoint[0]
+	regionsForSelected = statistics.GetRegionsForProducts(storage.KeyPoint)
 
 	targets, targetRowsLen, err := statistics.GetStatsForNN(storage.KeyPoint)
 	if err != nil {
@@ -31,10 +45,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	prediction := tools.PredictForModel(
-		[]float64{0.10170, 0.052899999999999996, 0.0895, 0.0756, 0.039130000000000005, 0.03716, 0.03163, 0.03174},
-		"model_for_chicken_meat.json")
+	denormalizedPrediction := tools.PredictForModel(
+		[]float64{0.10415, 0.05975, 0.07890000000000001, 0.0713, 0.038130000000000004, 0.0375, 0.027899999999999998, 0.02889},
+		"model_for_chicken_meat.json")[0]*1000
+	predictionForSelected = fmt.Sprintf("%.2f", denormalizedPrediction)
 
-	fmt.Println(prediction)
-
+	handleFunc()
 }
+
+

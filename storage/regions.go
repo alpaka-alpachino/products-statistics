@@ -1,8 +1,8 @@
 package storage
 
 type District struct {
-	name  string
-	index float64
+	Name  string
+	Index int
 }
 
 type Product struct {
@@ -35,17 +35,17 @@ var (
 	Chernigivska    = District{"Чернігівська", 1300}
 )
 
-var (
-	Wheat      = Product{"пшениця", []District{Vinnytska, Kyivska, Kirovogradska, Ternopliska, Harkivska, Cherkaska}}
-	Corn       = Product{"соняшник", []District{Vinnytska, IvanoFrankivska, Kirovogradska, Poltavska, Sumska, Harkivska, Hmelnytska, Cherkaska}}
-	Milk       = Product{"молоко", []District{Vinnytska, Zhytomyrska, Zaporizka, Lvivska, Poltavska, Hmelnytska, Chernigivska}}
-	Meat       = Product{"м'ясо", []District{Vinnytska, Volynska, Zaporizka, Dniprovska, Kyivska, Lvivska, Cherkaska}}
-	Buckwheat  = Product{"гречка", []District{Vinnytska, Kyivska, Sumska, Hmelnytska, Cherkaska}}
-	Vegetables = Product{"овочі", []District{Volynska, Dniprovska, Zhytomyrska, Zakarpatska, Kyivska, Mykolaivska, Poltavska, Ternopliska, Hersonska}}
-	Millet     = Product{"пшоно", []District{Dniprovska, Zaporizka, Mykolaivska}}
-	SugarBeets = Product{"цукрові буряки", []District{Zhytomyrska, IvanoFrankivska, Kyivska, Lvivska, Mykolaivska, Hmelnytska}}
-	Potato     = Product{"картопля", []District{Zhytomyrska, Sumska, Hmelnytska}}
-	Eggs       = Product{"яйця", []District{Kyivska, Harkivska, Hersonska, Hmelnytska}}
-	Rice       = Product{"рис", []District{Odeska, Hersonska}}
-	Fruits     = Product{"плоди та ягоди", []District{Odeska, Poltavska, Rivnenska, Chernivetsca}}
-)
+var ProductRegions = map[string][]District{
+	"борошно":  {Vinnytska, Kyivska, Kirovogradska, Ternopliska, Harkivska, Cherkaska},
+	"олія":     {Vinnytska, IvanoFrankivska, Kirovogradska, Poltavska, Sumska, Harkivska, Hmelnytska, Cherkaska},
+	"Молочні":  {Vinnytska, Zhytomyrska, Zaporizka, Lvivska, Poltavska, Hmelnytska, Chernigivska},
+	"М'ясні":   {Vinnytska, Volynska, Zaporizka, Dniprovska, Kyivska, Lvivska, Cherkaska},
+	"гречка":   {Vinnytska, Kyivska, Sumska, Hmelnytska, Cherkaska},
+	"Овочі":    {Volynska, Dniprovska, Zhytomyrska, Zakarpatska, Kyivska, Mykolaivska, Poltavska, Ternopliska, Hersonska},
+	"пшоно":    {Dniprovska, Zaporizka, Mykolaivska},
+	"цукор":    {Zhytomyrska, IvanoFrankivska, Kyivska, Lvivska, Mykolaivska, Hmelnytska},
+	"картопля": {Zhytomyrska, Sumska, Hmelnytska},
+	"Яйця":     {Kyivska, Harkivska, Hersonska, Hmelnytska},
+	"рис":      {Odeska, Hersonska},
+	"Фрукти":   {Odeska, Poltavska, Rivnenska, Chernivetsca},
+}

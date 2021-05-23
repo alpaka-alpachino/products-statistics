@@ -8,6 +8,7 @@ import (
 	"github.com/web-site/storage"
 	"log"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -23,7 +24,7 @@ const (
 
 var errEmptyDate = errors.New("empty date slice")
 
-type productStats struct {
+type ProductStats struct {
 	name         string
 	firstDate    time.Time
 	firstPrice   float64
@@ -44,20 +45,20 @@ func GetChanges(inputs []string, requestedStatus string) ([]string, error) {
 		}
 		status, change := SimpleTrendCheck(productStats.firstPrice, productStats.averagePrice, productStats.lastPrice)
 		if status == requestedStatus {
-			hotRises = append(hotRises, fmt.Sprintf(`%s:  %v`, inputs[v], change))
+			hotRises = append(hotRises, fmt.Sprintf("\n%s -->  %.2f;", inputs[v], change))
 		} else {
-			others = append(others, fmt.Sprintf(`%s:  %v`, inputs[v], change))
+			others = append(others, fmt.Sprintf("\n%s -->  %.2f;", inputs[v], change))
 		}
 	}
 	return hotRises, nil
 }
 
 // GetStatForProduct retrieves data for requested product from db
-func GetStatForProduct(prod string) (productStats, error) {
+func GetStatForProduct(prod string) (ProductStats, error) {
 	s := fmt.Sprintf(sourceFormat, os.Getenv("PG_USER"), os.Getenv("PG_PASS"), os.Getenv("PG_DB"))
 	database, err := sql.Open("postgres", s)
 	if err != nil {
-		return productStats{}, err
+		return ProductStats{}, err
 	}
 	defer func(database *sql.DB) {
 		err := database.Close()
@@ -68,7 +69,7 @@ func GetStatForProduct(prod string) (productStats, error) {
 
 	res, err := database.Query(selectQuery, prod)
 	if err != nil {
-		return productStats{}, err
+		return ProductStats{}, err
 	}
 
 	var prices []float64
@@ -78,7 +79,7 @@ func GetStatForProduct(prod string) (productStats, error) {
 		var model = new(storage.ProductModel)
 		err = res.Scan(&model.Date, &model.Price)
 		if err != nil {
-			return productStats{}, err
+			return ProductStats{}, err
 		}
 
 		storage.Statistics = append(storage.Statistics, *model)
@@ -91,9 +92,12 @@ func GetStatForProduct(prod string) (productStats, error) {
 	avg := Average(prices)
 
 	if len(dates) > 0 {
+		if len(dates) > 50 { // use this check if dont need different products
+			return ProductStats{}, nil
+		}
 		dates = dates[:len(dates)-1]
 		if len(dates) > 0 {
-			return productStats{
+			return ProductStats{
 				name:         prod,
 				firstDate:    dates[0],
 				firstPrice:   prices[0],
@@ -106,9 +110,10 @@ func GetStatForProduct(prod string) (productStats, error) {
 		}
 	}
 
-	return productStats{}, errEmptyDate
+	return ProductStats{}, errEmptyDate
 }
 
+// SimpleTrendCheck checks if there are changes in price during period
 func SimpleTrendCheck(initial, average, final float64) (string, float64) {
 	var wholeChange = final - initial
 	var hotChanges = final - average
@@ -127,6 +132,21 @@ func SimpleTrendCheck(initial, average, final float64) (string, float64) {
 	} else {
 		return Stable, 0
 	}
+}
+
+// GetRegionsForProducts returns list of regions with its land value related to input products
+func GetRegionsForProducts(inputs []string) map[string]string {
+	var regionsForProducts = make(map[string]string)
+	for p := range inputs {
+		for k, v := range storage.ProductRegions {
+			if strings.Contains(inputs[p], k) {
+				for vv := range v {
+					regionsForProducts[inputs[p]] = fmt.Sprintf("%s %s (%d)", regionsForProducts[inputs[p]], v[vv].Name, v[vv].Index)
+				}
+			}
+		}
+	}
+	return regionsForProducts
 }
 
 // MinMax gets minimal and maximum values from array
