@@ -9,8 +9,8 @@ import (
 type IndexStats struct {
 	HotRises           []string
 	RegionsForProducts map[string]string
-	Selected string
-	Prediction string
+	Selected           string
+	Prediction         string
 }
 
 func index(w http.ResponseWriter, r *http.Request) {

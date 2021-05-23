@@ -9,11 +9,11 @@ import (
 )
 
 var (
-	hotRises           []string
-	regionsForSelected map[string]string
-	selected string
+	hotRises              []string
+	regionsForSelected    map[string]string
+	selected              string
 	predictionForSelected string
-	err                error
+	err                   error
 )
 
 func main() {
@@ -47,10 +47,8 @@ func main() {
 
 	denormalizedPrediction := tools.PredictForModel(
 		[]float64{0.10415, 0.05975, 0.07890000000000001, 0.0713, 0.038130000000000004, 0.0375, 0.027899999999999998, 0.02889},
-		"model_for_chicken_meat.json")[0]*1000
+		"model_for_chicken_meat.json")[0] * 1000
 	predictionForSelected = fmt.Sprintf("%.2f", denormalizedPrediction)
 
 	handleFunc()
 }
-
-
