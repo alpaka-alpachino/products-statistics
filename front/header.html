@@ -7,9 +7,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" id="wixDesktopViewport">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-  <link rel="icon" sizes="192x192" href="https://www.wix.com/favicon.ico">
-  <link rel="shortcut icon" href="https://www.wix.com/favicon.ico" type="image/x-icon">
-  <link rel="apple-touch-icon" href="https://www.wix.com/favicon.ico" type="image/x-icon">
+  <link rel="icon"  href="front/icon.jpg">
+  <link rel="shortcut icon" href="front/icon.jpg" >
+  <link rel="apple-touch-icon" href="front/icon.jpg" >
   <!-- Safari Pinned Tab Icon -->
   <!-- <link rel="mask-icon" href="https://www.wix.com/favicon.ico"> -->
 
@@ -20,26 +20,26 @@
   <script src="https://polyfill.io/v3/polyfill.min.js?features=fetch" nomodule=""></script>
 
   <!-- Performance API Polyfills -->
-  <script>
-    (function () {
-      var noop = function noop() {
-      };
-      if ("performance" in window === false) {
-        window.performance = {};
-      }
-      window.performance.mark = performance.mark || noop;
-      window.performance.measure = performance.measure || noop;
-      if ("now" in window.performance === false) {
-        var nowOffset = Date.now();
-        if (performance.timing && performance.timing.navigationStart) {
-          nowOffset = performance.timing.navigationStart;
-        }
-        window.performance.now = function now() {
-          return Date.now() - nowOffset;
-        };
-      }
-    })();
-  </script>
+<!--  <script>-->
+<!--    (function () {-->
+<!--      var noop = function noop() {-->
+<!--      };-->
+<!--      if ("performance" in window === false) {-->
+<!--        window.performance = {};-->
+<!--      }-->
+<!--      window.performance.mark = performance.mark || noop;-->
+<!--      window.performance.measure = performance.measure || noop;-->
+<!--      if ("now" in window.performance === false) {-->
+<!--        var nowOffset = Date.now();-->
+<!--        if (performance.timing && performance.timing.navigationStart) {-->
+<!--          nowOffset = performance.timing.navigationStart;-->
+<!--        }-->
+<!--        window.performance.now = function now() {-->
+<!--          return Date.now() - nowOffset;-->
+<!--        };-->
+<!--      }-->
+<!--    })();-->
+<!--  </script>-->
 
   <!-- Globals Definitions -->
   <script>
@@ -2144,7 +2144,7 @@
         "siteAssetsUrl": "https:\/\/siteassets.parastorage.com",
         "pageJsonServerUrls": [
           "https:\/\/pages.wixstatic.com",
-          "https:\/\/staticorigin.wixstatic.com",
+          //"https:\/\/staticorigin.wixstatic.com",
           "https:\/\/fallback.wix.com\/wix-html-editor-pages-webapp\/page"
         ],
         "pathOfTBModulesInFileRepoForFallback": "wix-thunderbolt\/dist\/",
@@ -3995,6 +3995,7 @@
   <meta name="wix-dynamic-custom-elements" content="">
   <script data-url="https://static.parastorage.com/services/wix-thunderbolt/dist/initCustomElements.inline.891d7f64.chunk.min.js">(window.webpackJsonp__wix_thunderbolt_app = window.webpackJsonp__wix_thunderbolt_app || []).push([[65, 24], {
     127: function (e, t) {
+      //start_comm_s_0
       !function () {
         if (void 0 !== window.Reflect && void 0 !== window.customElements && !window.customElements.hasOwnProperty("polyfillWrapFlushCallback")) {
           var e = HTMLElement;
@@ -4052,6 +4053,9 @@
       }, v = function (e, t) {
         return e.getAttribute(t ? "xlink:href" : "src")
       };
+      //end_comm_s_0
+
+      //start_comm_s_1
       var T = {columnCount: 1, columns: 1, fontWeight: 1, lineHeight: 1, opacity: 1, zIndex: 1, zoom: 1},
               _ = function (e, t) {
                 return e && t && Object.keys(t).forEach((function (i) {
@@ -4093,7 +4097,8 @@
           }(a, c)
         }
       };
-
+//end_comm_s_1
+      //start_comm_s_2
       function S(e, t) {
         for (var i = 0; i < t.length; i++) {
           var r = t[i];
@@ -4795,6 +4800,8 @@
         return r
       }
 
+      //start_s_comm_3
+
       var oe = {
         measure: function (e, t, i, r, n) {
           var a = r.containerElm, o = r.isSvgImage, s = r.isSvgMask, c = r.mediaHeightOverrideType,
@@ -4858,6 +4865,8 @@
           }, h), n.imageLoader.loadImage(i[e], {screenHeight: t.screenHeight, boundingRect: t.boundingRect}))
         }
       };
+
+      //end_s_comm_2
 
       function se(e, t, i) {
         return void 0 === i && (i = 1.5), {parallax: e.height * i, fixed: e.screenHeight}[t] || e.height
@@ -5344,7 +5353,7 @@
           JPE: "jpe",
           PNG: "png",
           WEBP: "webp",
-          WIX_ICO_MP: "wix_ico_mp",
+         // WIX_ICO_MP: "wix_ico_mp",
           WIX_MP: "wix_mp",
           GIF: "gif",
           SVG: "svg",
@@ -5443,7 +5452,7 @@
         var r = i(3), n = i(0);
 
         function a(e) {
-          var t = [n.fileType.PNG, n.fileType.JPEG, n.fileType.JPG, n.fileType.JPE, n.fileType.WIX_ICO_MP, n.fileType.WIX_MP];
+          var t = [n.fileType.PNG, n.fileType.JPEG, n.fileType.JPG, n.fileType.JPE,  n.fileType.WIX_MP];
           return r.includes(t, c(e))
         }
 

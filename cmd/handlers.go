@@ -15,12 +15,12 @@ type IndexStats struct {
 
 func index(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("front/index.html", "front/header.html", "front/footer.html")
-
 	if err != nil {
 		fmt.Fprintf(w, err.Error())
 	}
 
-	stats := IndexStats{HotRises: hotRises,
+	stats := IndexStats{
+		HotRises:           hotRises,
 		RegionsForProducts: regionsForSelected,
 		Selected:           selected,
 		Prediction:         predictionForSelected,

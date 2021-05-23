@@ -110,21 +110,21 @@ func ScrapeMonthly() {
 	collectInfo.OnHTML(`#idx-content > div.prodsdataview > table > tbody > tr`, func(e *colly.HTMLElement) {
 		e.ForEach(`td:nth-child(1)`, func(_ int, inner *colly.HTMLElement) {
 			data := inner.Text
-			date, err = time.Parse(dataLayout,data)
+			date, err = time.Parse(dataLayout, data)
 			if err != nil {
 				panic(err)
 			}
 		})
 
 		e.ForEach(` td:nth-child(3)`, func(_ int, inner *colly.HTMLElement) {
-			data := strings.ReplaceAll(inner.Text,`,`,`.`)
-			price, err = strconv.ParseFloat(data,64)
+			data := strings.ReplaceAll(inner.Text, `,`, `.`)
+			price, err = strconv.ParseFloat(data, 64)
 			if err != nil {
 				panic(err)
 			}
 		})
 
-		insert, err := database.Query(sqlStatement,date,product,price)
+		insert, err := database.Query(sqlStatement, date, product, price)
 		if err != nil {
 			panic(err)
 		}
@@ -133,5 +133,3 @@ func ScrapeMonthly() {
 
 	collectGroups.Visit(`https://index.minfin.com.ua/ua/markets/wares/prods/`)
 }
-
-
