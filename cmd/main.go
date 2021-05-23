@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/web-site/statistics"
-	"github.com/web-site/storage"
-	"github.com/web-site/tools"
+	"github.com/products-statistics/statistics"
+	"github.com/products-statistics/storage"
+	"github.com/products-statistics/tools"
 	"log"
 )
 

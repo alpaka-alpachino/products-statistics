@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	_ "github.com/lib/pq"
-	"github.com/web-site/storage"
+	"github.com/products-statistics/storage"
 	"log"
 	"os"
 	"strings"

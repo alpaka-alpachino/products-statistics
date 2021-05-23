@@ -3,11 +3,10 @@ package statistics
 import (
 	"database/sql"
 	"fmt"
+	"github.com/products-statistics/storage"
 	"log"
 	"os"
 	"time"
-
-	"github.com/web-site/storage"
 )
 
 const (
