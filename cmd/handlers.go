@@ -43,13 +43,12 @@ func NewServer() *Server {
 	flag.Parse()
 
 	rtr := mux.NewRouter()
-	//rtr.Use(Middleware)
 	rtr.HandleFunc("/", index).Methods("GET")
 
 	return &Server{
 		&http.Server{
 			Addr:    addr,
-			Handler: ddosFilter(rtr),
+			Handler: limit(rtr),
 		},
 	}
 }
